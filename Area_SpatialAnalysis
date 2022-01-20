@@ -32,12 +32,13 @@ area<- na.omit(area)
 
 plot5<- ggplot(data = area, aes(x=Year, y=Cumulative_Area_km2, group=Species, color=Species))+
   geom_point()+
-  geom_line(size=2)+
+  geom_line(size=1.5)+
   theme_classic()+
   theme(axis.text.x = element_text(size = 15, face = "bold"),
         axis.text.y = element_text(size = 15, face = "bold"),
         axis.title.x = element_text(size = 20, face = "bold"),
         axis.title.y = element_text(size = 18, face = "bold"))+
+  scale_color_jcolors("pal6")+
   theme(legend.title = element_blank(),
         legend.text = element_blank(),
         legend.key = element_blank(),
@@ -51,12 +52,13 @@ plot5
 
 plot6<- ggplot(data = area, aes(x=Year_DecadeIndependent, y=Decade_Area_km2, group=Species, color=Species))+
   geom_point()+
-  geom_line(size=2)+
+  geom_line(size=1.5)+
   theme_classic()+
   theme(axis.text.x = element_text(size = 15, face = "bold"),
         axis.text.y = element_text(size = 15, face = "bold"),
         axis.title.x = element_text(size = 20, face = "bold"),
         axis.title.y = element_text(size = 18, face = "bold"))+
+  scale_color_jcolors("pal6")+
   theme(legend.title = element_blank(),
         legend.text = element_blank(),
         legend.key = element_blank(),
@@ -96,10 +98,11 @@ precipitation
 
 
 
-Area_Temperature<- ggplot(data = climate, aes(x=Annual_Temperature, y=Area_Independent, group=Species, color=Species))+
+Area_Temperature<- ggplot(data = climate, aes(x=Temp_DecadeAvg, y=Area_Independent, group=Species, color=Species))+
   geom_point()+
   geom_smooth()+
   theme_classic()+
+  scale_color_jcolors("pal6")+
   xlab("Annual Temperature (F)")+
   ylab("Area (km2)")
 
@@ -107,14 +110,55 @@ Area_Temperature
 
 
 
-Area_Precipitation<- ggplot(data = climate, aes(x=Annual_Precipitation, y=Area_Independent, group=Species, color=Species))+
+Area_Precipitation<- ggplot(data = climate, aes(x=Prec_DecadeAvg, y=Area_Independent, group=Species, color=Species))+
   geom_point()+
   geom_smooth()+
   theme_classic()+
+  scale_color_jcolors("pal6")+
   xlab("Annual Precipitation (inches)")+
   ylab("Area (km2)")
 
 Area_Precipitation
+
+
+area$Avg_Prec<- as.factor(area$Avg_Prec)
+area$Avg_Temp<- as.factor(area$Avg_Temp)
+
+
+
+boxplot(area$Decade_Area_km2~area$Avg_Prec)
+
+boxplot(area$Decade_Area_km2~area$Avg_Temp)
+
+
+
+#### Subset - Rhinella marina 
+
+RM<- subset(area, Species == "RM")
+
+boxplot(RM$Decade_Area_km2~RM$Avg_Prec)
+
+boxplot(RM$Decade_Area_km2~RM$Avg_Temp)
+
+
+
+## Subset - Osteopilus septentrionalis
+
+OS<- subset(area, Species == "OS")
+
+boxplot(OS$Decade_Area_km2~OS$Avg_Prec)
+
+boxplot(OS$Decade_Area_km2~OS$Avg_Temp)
+
+
+
+## Subset - Eleutherodactylus planirostris 
+
+EP<- subset(area, Species == "EP")
+
+boxplot(EP$Decade_Area_km2~EP$Avg_Prec)
+
+boxplot(EP$Decade_Area_km2~EP$Avg_Temp)
 
 
 
@@ -123,8 +167,21 @@ Area_Precipitation
 
 model<- lm(data = climate, Area_Independent ~ Prec_DecadeAvg + Temp_DecadeAvg + Decade + Species + Prec_DecadeAvg:Decade + Temp_DecadeAvg:Decade + Prec_DecadeAvg:Species + Temp_DecadeAvg:Species + Decade:Species)
 
+
+qqnorm(climate$Annual_Precipitation)
+qqline(climate$Annual_Precipitation)
+
+qqnorm(climate$Annual_Temperature)
+qqline(climate$Annual_Temperature)
+
+
+
 qqnorm(climate$Prec_DecadeAvg)
 qqline(climate$Prec_DecadeAvg)
+
+
+qqnorm(climate$Temp_DecadeAvg)
+qqline(climate$Temp_DecadeAvg)
 
 
 
@@ -133,7 +190,10 @@ autoplot(model, smooth.color = NA)
 
 
 
+### Additivity/Linearity Assumption
 
+ggplot(data = climate, aes(x = Prec_DecadeAvg, y = Area_Independent)) + geom_point() + geom_smooth(method = "lm", se=FALSE) + scale_color_brewer(palette = "Dark2") + theme_classic() 
 
+ggplot(data = climate, aes(x = Temp_DecadeAvg, y = Area_Independent)) + geom_point() + geom_smooth(method = "lm", se=FALSE) + scale_color_brewer(palette = "Dark2") + theme_classic() 
 
 
