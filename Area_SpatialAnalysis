@@ -1,0 +1,139 @@
+
+### Load in Packages 
+
+library(ggplot2)
+library(psych)
+library(sjstats)
+library(tidyverse)
+library(ggfortify)
+library(pwr)
+library(summarytools)
+library(emmeans)
+library(jcolors)
+
+
+
+rm(list = ls ()) # clears R's memory
+
+setwd("C://Users/andre/OneDrive/Documents/Dissertation/Cane Toads/Range Expansion/BiologicalInvasionsResubmission")
+
+
+### Area Expansion Trends
+
+area<- read.csv("anuran_area_update01182022.csv")
+head(area)
+
+area<- as.data.frame(area)
+
+area$Year<- as.factor(area$Year)
+area$Year_DecadeIndependent<- as.factor(area$Year_DecadeIndependent)
+
+area<- na.omit(area)
+
+plot5<- ggplot(data = area, aes(x=Year, y=Cumulative_Area_km2, group=Species, color=Species))+
+  geom_point()+
+  geom_line(size=2)+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 15, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.title.x = element_text(size = 20, face = "bold"),
+        axis.title.y = element_text(size = 18, face = "bold"))+
+  theme(legend.title = element_blank(),
+        legend.text = element_blank(),
+        legend.key = element_blank(),
+        legend.position = "none")+
+  xlab("Years")+
+  ylab("Area (km2)")
+plot5
+
+
+
+
+plot6<- ggplot(data = area, aes(x=Year_DecadeIndependent, y=Decade_Area_km2, group=Species, color=Species))+
+  geom_point()+
+  geom_line(size=2)+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 15, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.title.x = element_text(size = 20, face = "bold"),
+        axis.title.y = element_text(size = 18, face = "bold"))+
+  theme(legend.title = element_blank(),
+        legend.text = element_blank(),
+        legend.key = element_blank(),
+        legend.position = "none")+
+  xlab("Years")+
+  ylab("Area (km2)")
+plot6
+
+
+
+
+## Florida Climate Analysis 
+
+climate<- read.csv("Climate_Area_Analysis.csv")
+
+
+
+temperature<- ggplot(data = climate, aes(x=Year, y=Annual_Temperature))+
+  geom_point()+
+  geom_line(size=2)+
+  theme_classic()+
+  xlab("Year")+
+  ylab("Temperature (F))")
+
+temperature
+
+precipitation<- ggplot(data = climate, aes(x=Year, y=Annual_Precipitation))+
+  geom_point()+
+  geom_line(size=2)+
+  theme_classic()+
+  xlab("Year")+
+  ylab("Precipitation (inches))")
+
+precipitation
+
+
+
+
+
+Area_Temperature<- ggplot(data = climate, aes(x=Annual_Temperature, y=Area_Independent, group=Species, color=Species))+
+  geom_point()+
+  geom_smooth()+
+  theme_classic()+
+  xlab("Annual Temperature (F)")+
+  ylab("Area (km2)")
+
+Area_Temperature
+
+
+
+Area_Precipitation<- ggplot(data = climate, aes(x=Annual_Precipitation, y=Area_Independent, group=Species, color=Species))+
+  geom_point()+
+  geom_smooth()+
+  theme_classic()+
+  xlab("Annual Precipitation (inches)")+
+  ylab("Area (km2)")
+
+Area_Precipitation
+
+
+
+
+### General Linear Model
+
+model<- lm(data = climate, Area_Independent ~ Prec_DecadeAvg + Temp_DecadeAvg + Decade + Species + Prec_DecadeAvg:Decade + Temp_DecadeAvg:Decade + Prec_DecadeAvg:Species + Temp_DecadeAvg:Species + Decade:Species)
+
+qqnorm(climate$Prec_DecadeAvg)
+qqline(climate$Prec_DecadeAvg)
+
+
+
+# checking for the homogeneity of variance (bottom-left graph labelled Scale-Location) and normality of residuals (top-right graph labelled Normal Q-Q) assumptions
+autoplot(model, smooth.color = NA)
+
+
+
+
+
+
+
