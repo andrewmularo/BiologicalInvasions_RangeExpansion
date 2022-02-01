@@ -10,6 +10,7 @@ library(pwr)
 library(summarytools)
 library(emmeans)
 library(jcolors)
+library(ggpubr)
 
 
 
@@ -22,13 +23,14 @@ setwd("C://Users/andre/OneDrive/Documents/Dissertation/Cane Toads/Range Expansio
 
 area<- read.csv("anuran_area_update01182022.csv")
 head(area)
-
+View(area)
 area<- as.data.frame(area)
 
 area$Year<- as.factor(area$Year)
 area$Year_DecadeIndependent<- as.factor(area$Year_DecadeIndependent)
 
-area<- na.omit(area)
+
+## Cumulative - Not for use in publication 
 
 plot5<- ggplot(data = area, aes(x=Year, y=Cumulative_Area_km2, group=Species, color=Species))+
   geom_point()+
@@ -43,157 +45,63 @@ plot5<- ggplot(data = area, aes(x=Year, y=Cumulative_Area_km2, group=Species, co
         legend.text = element_blank(),
         legend.key = element_blank(),
         legend.position = "none")+
+  scale_x_discrete()+
   xlab("Years")+
   ylab("Area (km2)")
 plot5
 
 
+## Decade Independent - PUBLICATION
 
-
-plot6<- ggplot(data = area, aes(x=Year_DecadeIndependent, y=Decade_Area_km2, group=Species, color=Species))+
+plot6<-  ggplot(data = area, aes(x=Year_DecadeIndependent, y=Decade_Area_km2, group=Species, color=Species))+
   geom_point()+
-  geom_line(size=1.5)+
+  geom_line(size=2)+
   theme_classic()+
-  theme(axis.text.x = element_text(size = 15, face = "bold"),
-        axis.text.y = element_text(size = 15, face = "bold"),
-        axis.title.x = element_text(size = 20, face = "bold"),
-        axis.title.y = element_text(size = 18, face = "bold"))+
   scale_color_jcolors("pal6")+
+  theme(axis.text.x = element_text(size = 20, face = "bold"),
+        axis.text.y = element_text(size = 20, face = "bold"),
+        axis.title.x = element_text(size = 25, face = "bold"),
+        axis.title.y = element_text(size = 25, face = "bold"))+
   theme(legend.title = element_blank(),
         legend.text = element_blank(),
         legend.key = element_blank(),
         legend.position = "none")+
+  scale_x_discrete()+
   xlab("Years")+
   ylab("Area (km2)")
 plot6
 
+### Further aesthetically modified
 
 
 
 ## Florida Climate Analysis 
 
-climate<- read.csv("Climate_Area_Analysis.csv")
 
 
+temperature<- read.csv("Florida_StateWide_Temperature.csv")
+precipitation<- read.csv("Florida_StateWide_Precipitation.csv")
 
-temperature<- ggplot(data = climate, aes(x=Year, y=Annual_Temperature))+
+
+temperature<- ggplot(data = temperature, aes(x=Year, y=Annual))+
   geom_point()+
   geom_line(size=2)+
   theme_classic()+
   xlab("Year")+
-  ylab("Temperature (F))")
+  ylab("Temperature (F)")+
+  labs(title = "Florida Annual Temperature")
 
 temperature
 
-precipitation<- ggplot(data = climate, aes(x=Year, y=Annual_Precipitation))+
+precipitation<- ggplot(data = precipitation, aes(x=Year, y=Annual))+
   geom_point()+
   geom_line(size=2)+
   theme_classic()+
   xlab("Year")+
-  ylab("Precipitation (inches))")
+  ylab("Precipitation (inches)")+
+  labs(title = "Florida Annual Precipitation")
 
 precipitation
 
 
-
-
-
-Area_Temperature<- ggplot(data = climate, aes(x=Temp_DecadeAvg, y=Area_Independent, group=Species, color=Species))+
-  geom_point()+
-  geom_smooth()+
-  theme_classic()+
-  scale_color_jcolors("pal6")+
-  xlab("Annual Temperature (F)")+
-  ylab("Area (km2)")
-
-Area_Temperature
-
-
-
-Area_Precipitation<- ggplot(data = climate, aes(x=Prec_DecadeAvg, y=Area_Independent, group=Species, color=Species))+
-  geom_point()+
-  geom_smooth()+
-  theme_classic()+
-  scale_color_jcolors("pal6")+
-  xlab("Annual Precipitation (inches)")+
-  ylab("Area (km2)")
-
-Area_Precipitation
-
-
-area$Avg_Prec<- as.factor(area$Avg_Prec)
-area$Avg_Temp<- as.factor(area$Avg_Temp)
-
-
-
-boxplot(area$Decade_Area_km2~area$Avg_Prec)
-
-boxplot(area$Decade_Area_km2~area$Avg_Temp)
-
-
-
-#### Subset - Rhinella marina 
-
-RM<- subset(area, Species == "RM")
-
-boxplot(RM$Decade_Area_km2~RM$Avg_Prec)
-
-boxplot(RM$Decade_Area_km2~RM$Avg_Temp)
-
-
-
-## Subset - Osteopilus septentrionalis
-
-OS<- subset(area, Species == "OS")
-
-boxplot(OS$Decade_Area_km2~OS$Avg_Prec)
-
-boxplot(OS$Decade_Area_km2~OS$Avg_Temp)
-
-
-
-## Subset - Eleutherodactylus planirostris 
-
-EP<- subset(area, Species == "EP")
-
-boxplot(EP$Decade_Area_km2~EP$Avg_Prec)
-
-boxplot(EP$Decade_Area_km2~EP$Avg_Temp)
-
-
-
-
-### General Linear Model
-
-model<- lm(data = climate, Area_Independent ~ Prec_DecadeAvg + Temp_DecadeAvg + Decade + Species + Prec_DecadeAvg:Decade + Temp_DecadeAvg:Decade + Prec_DecadeAvg:Species + Temp_DecadeAvg:Species + Decade:Species)
-
-
-qqnorm(climate$Annual_Precipitation)
-qqline(climate$Annual_Precipitation)
-
-qqnorm(climate$Annual_Temperature)
-qqline(climate$Annual_Temperature)
-
-
-
-qqnorm(climate$Prec_DecadeAvg)
-qqline(climate$Prec_DecadeAvg)
-
-
-qqnorm(climate$Temp_DecadeAvg)
-qqline(climate$Temp_DecadeAvg)
-
-
-
-# checking for the homogeneity of variance (bottom-left graph labelled Scale-Location) and normality of residuals (top-right graph labelled Normal Q-Q) assumptions
-autoplot(model, smooth.color = NA)
-
-
-
-### Additivity/Linearity Assumption
-
-ggplot(data = climate, aes(x = Prec_DecadeAvg, y = Area_Independent)) + geom_point() + geom_smooth(method = "lm", se=FALSE) + scale_color_brewer(palette = "Dark2") + theme_classic() 
-
-ggplot(data = climate, aes(x = Temp_DecadeAvg, y = Area_Independent)) + geom_point() + geom_smooth(method = "lm", se=FALSE) + scale_color_brewer(palette = "Dark2") + theme_classic() 
-
-
+ggarrange(temperature, precipitation, nrow = 2, ncol = 1)
